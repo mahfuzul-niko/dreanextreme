@@ -30,8 +30,7 @@ class ProductController extends Controller
         if (Auth::user()->type == 1) {
             $products = Product::orderBy('id', 'DESC')->get();
             return view('admin.product.index', compact('products'));
-        }
-        else{
+        } else {
             Alert::toast('Access Denied !', 'error');
             return back();
         }
@@ -50,8 +49,7 @@ class ProductController extends Controller
             $colors = Colors::orderBy('name', 'ASC')->get();
             $variations = Variation::all();
             return view('admin.product.create', compact('categories', 'brands', 'colors', 'variations'));
-        }
-        else{
+        } else {
             Alert::toast('Access Denied !', 'error');
             return back();
         }
@@ -69,7 +67,7 @@ class ProductController extends Controller
         while (strlen($code) < 6) {
             $position = rand(0, $charactersNumber - 1);
             $character = $characters[$position];
-            $code = $code.$character;
+            $code = $code . $character;
         }
 
         if (Product::where('code', $code)->exists()) {
@@ -80,170 +78,166 @@ class ProductController extends Controller
 
     }
 
-    public function generate_variation(Request $request) {
+    public function generate_variation(Request $request)
+    {
         $info = '';
 
         $atributes = $request->attribute;
-            $output = '';
-            $atribute_output = '';
-            $colour = $request->colour;
+        $output = '';
+        $atribute_output = '';
+        $colour = $request->colour;
 
-            $size = $request->size;
-            $code = $request->code;
-            $price = $request->price??0;
-            $stock = $request->stock??0;
-            
-            if(!is_null($colour)) {
-                $colour_info = Colors::where('code', $colour)->first();
-                $color_id = $colour_info->id;
-                $colour_output = '<div class="p-2 shadow rounded"><b>Colour: </b> <span style="background-color: '.$colour.'; padding: 5px;">'.$colour_info->name.'</span></div>';
-            }
-            else {
-                $colour_output = '';
-                $colour_info = '';
-                $color_id = '';
-            }
+        $size = $request->size;
+        $code = $request->code;
+        $price = $request->price ?? 0;
+        $stock = $request->stock ?? 0;
 
-            $generating_id = date("ymdhis");
-            
-            if(!is_null($atributes)) {
-                // foreach($atributes as $atribute) {
-                    $atribute_info = Variation::where('id', $atributes)->first();
-                    if(!is_null($atribute_info)) {
-                        $atribute_output .= '<div>
-                        <input type="hidden" name="attribute_id[]" value="'.$atribute_info->id.'">
-                        <input type="hidden" name="attribute_id'.$generating_id.'" value="'.$atribute_info->id.'">
+        if (!is_null($colour)) {
+            $colour_info = Colors::where('code', $colour)->first();
+            $color_id = $colour_info->id;
+            $colour_output = '<div class="p-2 shadow rounded"><b>Colour: </b> <span style="background-color: ' . $colour . '; padding: 5px;">' . $colour_info->name . '</span></div>';
+        } else {
+            $colour_output = '';
+            $colour_info = '';
+            $color_id = '';
+        }
+
+        $generating_id = date("ymdhis");
+
+        if (!is_null($atributes)) {
+            // foreach($atributes as $atribute) {
+            $atribute_info = Variation::where('id', $atributes)->first();
+            if (!is_null($atribute_info)) {
+                $atribute_output .= '<div>
+                        <input type="hidden" name="attribute_id[]" value="' . $atribute_info->id . '">
+                        <input type="hidden" name="attribute_id' . $generating_id . '" value="' . $atribute_info->id . '">
                             
-                        <label><span class="text-danger">*</span>'.$atribute_info->title.'</label>
-                        <input type="text" class="form-control" name="attribute_value[]" value="'.$size.'" placeholder="M,L,XL" required><br>
+                        <label><span class="text-danger">*</span>' . $atribute_info->title . '</label>
+                        <input type="text" class="form-control" name="attribute_value[]" value="' . $size . '" placeholder="M,L,XL" required><br>
 
                         <label><span class="text-danger">*</span>CODE:</label>
-                        <input type="text" class="form-control" name="variant_sku[]" value="'.$code.'" placeholder="ASXX" required>
+                        <input type="text" class="form-control" name="variant_sku[]" value="' . $code . '" placeholder="ASXX" required>
                     </div>';
-                    }
-                    else {
-                        $atribute_output .= '<div>
+            } else {
+                $atribute_output .= '<div>
                         <input type="hidden" name="attribute_id[]" value="">
-                        <input type="hidden" name="attribute_id'.$generating_id.'" value="">
+                        <input type="hidden" name="attribute_id' . $generating_id . '" value="">
                         <input type="hidden" name="attribute_value[]" value="">
                         <input type="hidden" name="variant_sku[]" value="">
                         </div>';
-                    }
-                    
-                // }
-                
             }
-            else {
-                $atribute_output = '';
-                $atribute_info = '';
-            }
-            
-            
-            $output .= '<div class="row p-2 shadow rounded mb-4" id="variation_info_div_'.$generating_id.'">
-                        <input type="hidden" id="variation_parent'.$generating_id.'" name="variation_parent[]" value="'.$generating_id.'">
-                        <input type="hidden" name="colour_attribute[]" value="'.$color_id.'">
+
+            // }
+
+        } else {
+            $atribute_output = '';
+            $atribute_info = '';
+        }
+
+
+        $output .= '<div class="row p-2 shadow rounded mb-4" id="variation_info_div_' . $generating_id . '">
+                        <input type="hidden" id="variation_parent' . $generating_id . '" name="variation_parent[]" value="' . $generating_id . '">
+                        <input type="hidden" name="colour_attribute[]" value="' . $color_id . '">
                         <input type="hidden" name="new_or_old[]" value="new">
 			              <div class="col-md-5">
 			                <div>
-                                '.$colour_output.'<br>
-                                '.$atribute_output.'
+                                ' . $colour_output . '<br>
+                                ' . $atribute_output . '
 			                </div>
 			              </div>
 			              <div class="col-md-6 shadow rounded border p-1 px-4">
 			                  <div class="form-group">
             				    <label class="col-form-label"><b>Image</b></label>
-            				    <input type="file" name="variation_image'.$generating_id.'" class="form-control">
+            				    <input type="file" name="variation_image' . $generating_id . '" class="form-control">
             				  </div>
             				  
             				  <div class="form-group">
             				    <label class="col-form-label"><span class="text-danger">*</span><b>Variant Price</b></label>
-            				    <input type="number" name="variant_price[]" value="'.$price.'" class="form-control"required step=any>
+            				    <input type="number" name="variant_price[]" value="' . $price . '" class="form-control"required step=any>
             				  </div>
             				  
             				  <div class="form-group">
             				    <label class="col-form-label"><span class="text-danger">*</span><b>Stock Quantity</b></label>
-            				    <input type="number" name="variation_stock_qty[]" value="'.$stock.'" class="form-control" required>
+            				    <input type="number" name="variation_stock_qty[]" value="' . $stock . '" class="form-control" required>
             				  </div>
 			              </div>
 			              
 			              <div class="col-md-1">
-			                  <button type="button" class="btn btn-danger" onclick="remove_variation_div('.$generating_id.')"><i class="fas fa-trash-alt text-light"></i></button>
+			                  <button type="button" class="btn btn-danger" onclick="remove_variation_div(' . $generating_id . ')"><i class="fas fa-trash-alt text-light"></i></button>
 			              </div>
 			          </div>';
-            
-            $info = [
-                    'status'=>'yes',
-                    'code'=>$generating_id,
-                    'output'=>$output,
-                ];
-        
+
+        $info = [
+            'status' => 'yes',
+            'code' => $generating_id,
+            'output' => $output,
+        ];
+
         return Response($info);
     }
 
 
-    public function generate_variationOld(Request $request) {
+    public function generate_variationOld(Request $request)
+    {
         $info = '';
         $atributes = $request->attribute;
-            $output = '';
-            $atribute_output = '';
-            $colour = $request->colour;
-            
-            if(!is_null($colour)) {
-                $colour_info = Colors::where('code', $colour)->first();
-                $color_id = $colour_info->id;
-                $colour_output = '<div class="p-2 shadow rounded"><b>Colour: </b> <span style="background-color: '.$colour.'; padding: 5px;">'.$colour_info->name.'</span></div>';
-            }
-            else {
-                $colour_output = '';
-                $colour_info = '';
-                $color_id = '';
-            }
+        $output = '';
+        $atribute_output = '';
+        $colour = $request->colour;
 
-            $generating_id = date("ymdhis");
-            
-            if(!is_null($atributes)) {
-                // foreach($atributes as $atribute) {
-                    $atribute_info = Variation::where('id', $atributes)->first();
-                    if(!is_null($atribute_info)) {
-                        $atribute_output .= '<div>
-                        <input type="hidden" name="attribute_id[]" value="'.$atribute_info->id.'">
-                        <input type="hidden" name="attribute_id'.$generating_id.'" value="'.$atribute_info->id.'">
+        if (!is_null($colour)) {
+            $colour_info = Colors::where('code', $colour)->first();
+            $color_id = $colour_info->id;
+            $colour_output = '<div class="p-2 shadow rounded"><b>Colour: </b> <span style="background-color: ' . $colour . '; padding: 5px;">' . $colour_info->name . '</span></div>';
+        } else {
+            $colour_output = '';
+            $colour_info = '';
+            $color_id = '';
+        }
+
+        $generating_id = date("ymdhis");
+
+        if (!is_null($atributes)) {
+            // foreach($atributes as $atribute) {
+            $atribute_info = Variation::where('id', $atributes)->first();
+            if (!is_null($atribute_info)) {
+                $atribute_output .= '<div>
+                        <input type="hidden" name="attribute_id[]" value="' . $atribute_info->id . '">
+                        <input type="hidden" name="attribute_id' . $generating_id . '" value="' . $atribute_info->id . '">
                             
-                        <label><span class="text-danger">*</span>'.$atribute_info->title.'</label>
+                        <label><span class="text-danger">*</span>' . $atribute_info->title . '</label>
                         <input type="text" class="form-control" name="attribute_value[]" value="" required>
                     </div>';
-                    }
-                    else {
-                        $atribute_output .= '<div>
+            } else {
+                $atribute_output .= '<div>
                         <input type="hidden" name="attribute_id[]" value="">
-                        <input type="hidden" name="attribute_id'.$generating_id.'" value="">
+                        <input type="hidden" name="attribute_id' . $generating_id . '" value="">
                         <input type="hidden" name="attribute_value[]" value="">
                         </div>';
-                    }
-                    
-                // }
-                
             }
-            else {
-                $atribute_output = '';
-                $atribute_info = '';
-            }
-            
-            
-            $output .= '<div class="row p-2 shadow rounded mb-4" id="variation_info_div_'.$generating_id.'">
-                        <input type="hidden" id="variation_parent'.$generating_id.'" name="variation_parent[]" value="'.$generating_id.'">
-                        <input type="hidden" name="colour_attribute[]" value="'.$color_id.'">
+
+            // }
+
+        } else {
+            $atribute_output = '';
+            $atribute_info = '';
+        }
+
+
+        $output .= '<div class="row p-2 shadow rounded mb-4" id="variation_info_div_' . $generating_id . '">
+                        <input type="hidden" id="variation_parent' . $generating_id . '" name="variation_parent[]" value="' . $generating_id . '">
+                        <input type="hidden" name="colour_attribute[]" value="' . $color_id . '">
                         <input type="hidden" name="new_or_old[]" value="new">
 			              <div class="col-md-5">
 			                <div>
-                                '.$colour_output.'<br>
-                                '.$atribute_output.'
+                                ' . $colour_output . '<br>
+                                ' . $atribute_output . '
 			                </div>
 			              </div>
 			              <div class="col-md-6 shadow rounded border p-1 px-4">
 			                  <div class="form-group">
             				    <label class="col-form-label"><b>Image</b></label>
-            				    <input type="file" name="variation_image'.$generating_id.'" class="form-control">
+            				    <input type="file" name="variation_image' . $generating_id . '" class="form-control">
             				  </div>
             				  
             				  <div class="form-group">
@@ -258,16 +252,16 @@ class ProductController extends Controller
 			              </div>
 			              
 			              <div class="col-md-1">
-			                  <button type="button" class="btn btn-danger" onclick="remove_variation_div('.$generating_id.')"><i class="fas fa-trash-alt text-light"></i></button>
+			                  <button type="button" class="btn btn-danger" onclick="remove_variation_div(' . $generating_id . ')"><i class="fas fa-trash-alt text-light"></i></button>
 			              </div>
 			          </div>';
-            
-            $info = [
-                    'status'=>'yes',
-                    'code'=>$generating_id,
-                    'output'=>$output,
-                ];
-        
+
+        $info = [
+            'status' => 'yes',
+            'code' => $generating_id,
+            'output' => $output,
+        ];
+
         return Response($info);
     }
 
@@ -285,34 +279,33 @@ class ProductController extends Controller
             'image' => 'nullable',
         ]);
 
-        
+
         $product = new Product;
         $product->title = $request->title;
         $product->category_id = 0;
         $product->sub_category_id = 0;
         $product->brand_id = $request->brand_id;
         $product->unit_type = $request->unit_type;
-        $product->is_featured = isset($request->is_featured)? 1 : 0;
-        $product->is_tranding = isset($request->is_tranding)? 1 : 0;
-        $product->todays_deal = isset($request->todays_deal)? 1 : 0;
+        $product->is_featured = isset($request->is_featured) ? 1 : 0;
+        $product->is_tranding = isset($request->is_tranding) ? 1 : 0;
+        $product->todays_deal = isset($request->todays_deal) ? 1 : 0;
         $product->discount_type = $request->discount_type;
         $product->discount_amount = $request->discount_amount;
         $product->type = $request->type;
         $product->feature = $request->feature;
         $product->description = $request->description;
-        
+
         if (!empty($request->code)) {
             $product->code = $request->code;
-        }
-        else{
+        } else {
             $product->code = $this->generateUniqueCode();
         }
 
         // image save
-        if ($request->image){
+        if ($request->image) {
             $image = $request->file('image');
-            $img = time().rand().'.' . $image->getClientOriginalExtension();
-            $location = public_path('images/product/'. $img);
+            $img = time() . rand() . '.' . $image->getClientOriginalExtension();
+            $location = public_path('images/product/' . $img);
             Image::make($image)->save($location);
             $product->thumbnail_image = $img;
         }
@@ -325,33 +318,31 @@ class ProductController extends Controller
 
         $product->save();
 
-        if($request->type == 'variation') {
+        if ($request->type == 'variation') {
             $colors = array();
             $attributes = array();
-            if($request->has('variation_parent')){
-                foreach($request->variation_parent as $key => $row) {
+            if ($request->has('variation_parent')) {
+                foreach ($request->variation_parent as $key => $row) {
                     $variation_parent = $request->variation_parent[$key];
 
-                    if($request->has('colour_attribute')){
+                    if ($request->has('colour_attribute')) {
                         //For colors attribute
                         $color = $request->colour_attribute[$key];
-                        if(!in_array($color, $colors) && $color != '') {
+                        if (!in_array($color, $colors) && $color != '') {
                             array_push($colors, $color);
                         }
-                    }
-                    else {
+                    } else {
                         $color = '';
                     }
 
-                    if($request->has('attribute_id')){
+                    if ($request->has('attribute_id')) {
                         //For variation attribute
                         $attribute = $request->attribute_id[$key];
-                        if(!in_array($attribute, $attributes) && $attribute != '') {
+                        if (!in_array($attribute, $attributes) && $attribute != '') {
                             array_push($attributes, $attribute);
                         }
                         $attribute_value = $request->attribute_value[$key];
-                    }
-                    else {
+                    } else {
                         $attribute = '';
                         $attribute_value = '';
                     }
@@ -361,16 +352,16 @@ class ProductController extends Controller
                     $stock->color = $color;
                     $stock->variant = $attribute;
                     $stock->variant_output = $attribute_value;
-                    $stock->sku = $request->variant_sku[$key]??($product->id.'-'.$key);
-                    $stock->price = $request->variant_price[$key]??0;
-                    $stock->qty = $request->variation_stock_qty[$key]??0;
+                    $stock->sku = $request->variant_sku[$key] ?? ($product->id . '-' . $key);
+                    $stock->price = $request->variant_price[$key] ?? 0;
+                    $stock->qty = $request->variation_stock_qty[$key] ?? 0;
 
                     // image save
-                    $img_v = 'variation_image'.$variation_parent;
-                    if ($request->$img_v){
+                    $img_v = 'variation_image' . $variation_parent;
+                    if ($request->$img_v) {
                         $image = $request->file($img_v);
-                        $img = time().rand().'.' . $image->getClientOriginalExtension();
-                        $location = public_path('images/product/'. $img);
+                        $img = time() . rand() . '.' . $image->getClientOriginalExtension();
+                        $location = public_path('images/product/' . $img);
                         Image::make($image)->save($location);
                         $stock->image = $img;
                     }
@@ -383,8 +374,7 @@ class ProductController extends Controller
                 $product->save();
 
             }
-        }
-        else {
+        } else {
             $stock = new ProductStocks;
             $stock->product_id = $product->id;
             $stock->price = $request->price;
@@ -394,21 +384,21 @@ class ProductController extends Controller
 
 
         if (!empty($request->categories) && is_array($request->categories)) {
-                foreach($request->categories as $category) {
-                    $new_category = new ProductWithCategory;
-                    $new_category->category_id = $category;
-                    $new_category->product_id = $product->id;
-                    $new_category->save();
-                }
+            foreach ($request->categories as $category) {
+                $new_category = new ProductWithCategory;
+                $new_category->category_id = $category;
+                $new_category->product_id = $product->id;
+                $new_category->save();
+            }
         }
 
 
         // check if any gallery image then save
         if (!empty($request->gallery) && is_array($request->gallery)) {
             $i = 0;
-            foreach ($request->gallery as $gallery){
+            foreach ($request->gallery as $gallery) {
                 $img = time() . $i . '.' . $gallery->getClientOriginalExtension();
-                $location = public_path('images/product/'. $img);
+                $location = public_path('images/product/' . $img);
                 Image::make($gallery)->save($location);
 
                 $gallery = new ProductImage;
@@ -451,14 +441,12 @@ class ProductController extends Controller
                 $brands = Brand::orderBy('id', 'DESC')->get();
                 $colors = Colors::orderBy('name', 'ASC')->get();
                 $variations = Variation::all();
-                return view('admin.product.edit', compact('product','categories', 'colors', 'variations', 'sub_categories', 'brands'));
-            }
-            else{
+                return view('admin.product.edit', compact('product', 'categories', 'colors', 'variations', 'sub_categories', 'brands'));
+            } else {
                 Alert::toast('Page Not Found !', 'error');
                 return back();
             }
-        }
-        else{
+        } else {
             Alert::toast('Access Denied !', 'error');
             return back();
         }
@@ -477,7 +465,7 @@ class ProductController extends Controller
             'title' => 'required|max:255',
         ]);
 
-        
+
         $product = Product::find($id);
 
         if (!is_null($product)) {
@@ -487,15 +475,15 @@ class ProductController extends Controller
             $product->sub_category_id = 0; //$request->sub_category_id;
             $product->brand_id = $request->brand_id;
             $product->unit_type = $request->unit_type;
-            $product->is_featured = isset($request->is_featured)? 1 : 0;
-            $product->is_tranding = isset($request->is_tranding)? 1 : 0;
-            $product->todays_deal = isset($request->todays_deal)? 1 : 0;
+            $product->is_featured = isset($request->is_featured) ? 1 : 0;
+            $product->is_tranding = isset($request->is_tranding) ? 1 : 0;
+            $product->todays_deal = isset($request->todays_deal) ? 1 : 0;
             $product->discount_type = $request->discount_type;
             $product->discount_amount = $request->discount_amount;
             $product->type = $request->type;
             $product->feature = $request->feature;
             $product->description = $request->description;
-            
+
 
             //Meta info
             $product->meta_title = $request->meta_title;
@@ -504,23 +492,22 @@ class ProductController extends Controller
             $product->meta_description = $request->meta_description;
 
 
-            if ( !empty($request->code)) {
+            if (!empty($request->code)) {
                 $product->code = $request->code;
-            }
-            else{
+            } else {
                 $product->code = $this->generateUniqueCode();
             }
 
             // image save
-            if ($request->image){
+            if ($request->image) {
 
-                if (File::exists('images/product/'.$product->thumbnail_image)){
-                    File::delete('images/product/'.$product->thumbnail_image);
+                if (File::exists('images/product/' . $product->thumbnail_image)) {
+                    File::delete('images/product/' . $product->thumbnail_image);
                 }
 
                 $image = $request->file('image');
                 $img = time() . '.' . $image->getClientOriginalExtension();
-                $location = public_path('images/product/'. $img);
+                $location = public_path('images/product/' . $img);
                 Image::make($image)->save($location);
                 $product->thumbnail_image = $img;
             }
@@ -529,34 +516,34 @@ class ProductController extends Controller
 
             // check if any gallery image then save
             if (!empty($request->gallery) && is_array($request->gallery)) {
-                    foreach ($product->product_image as $image) {
-                        if (File::exists('images/product/'.$image->image)){
-                            File::delete('images/product/'.$image->image);
-                        }
-                        $image->delete();
+                foreach ($product->product_image as $image) {
+                    if (File::exists('images/product/' . $image->image)) {
+                        File::delete('images/product/' . $image->image);
                     }
-                    $i = 0;
-                    foreach ($request->gallery as $gallery){
-                        $img = time() . $i . '.' . $gallery->getClientOriginalExtension();
-                        $location = public_path('images/product/'. $img);
-                        Image::make($gallery)->save($location);
+                    $image->delete();
+                }
+                $i = 0;
+                foreach ($request->gallery as $gallery) {
+                    $img = time() . $i . '.' . $gallery->getClientOriginalExtension();
+                    $location = public_path('images/product/' . $img);
+                    Image::make($gallery)->save($location);
 
-                        $gallery = new ProductImage;
-                        $gallery->image = $img;
-                        $gallery->product_id = $product->id;
-                        $gallery->save();
-                        $i = $i + 1;
-                    }
+                    $gallery = new ProductImage;
+                    $gallery->image = $img;
+                    $gallery->product_id = $product->id;
+                    $gallery->save();
+                    $i = $i + 1;
+                }
             }
 
             foreach ($product->product_category as $p_category) {
                 $p_category->delete();
             }
 
-            if(isset($request->categories)) {
+            if (isset($request->categories)) {
                 $categories = $request->categories;
-                if (count($categories) > 0){
-                    foreach($categories as $category) {
+                if (count($categories) > 0) {
+                    foreach ($categories as $category) {
                         $new_category = new ProductWithCategory;
                         $new_category->category_id = $category;
                         $new_category->product_id = $product->id;
@@ -565,151 +552,143 @@ class ProductController extends Controller
                 }
             }
 
-            if($request->type == 'variation') {
+            if ($request->type == 'variation') {
                 $colors = array();
                 $attributes = array();
-                if($request->has('variation_parent')){
-                    foreach($request->variation_parent as $key => $row) {
+                if ($request->has('variation_parent')) {
+                    foreach ($request->variation_parent as $key => $row) {
                         $new_or_old = $request->new_or_old[$key];
 
-                        if($new_or_old == 'old') {
+                        if ($new_or_old == 'old') {
                             $variation_parent = $request->variation_parent[$key];
                             $stock = ProductStocks::find($variation_parent);
-                            if(!is_null($stock)) {
-                                if($request->is_active[$key] == 2) { // Delete variation
+                            if (!is_null($stock)) {
+                                if ($request->is_active[$key] == 2) { // Delete variation
                                     $stock->delete();
-                                }
-                                else {
+                                } else {
 
-                                    if($request->has('colour_attribute')){
+                                    if ($request->has('colour_attribute')) {
                                         //For colors attribute
                                         $color = $request->colour_attribute[$key];
-                                        if(!in_array($color, $colors) && $color != '') {
+                                        if (!in_array($color, $colors) && $color != '') {
                                             array_push($colors, $color);
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         $color = '';
                                     }
-                
-                                    if($request->has('attribute_id') && $request->attribute_id <> null){
+
+                                    if ($request->has('attribute_id') && $request->attribute_id <> null) {
                                         //For variation attribute
                                         $attribute = $request->attribute_id[$key];
-                                        if(!in_array($attribute, $attributes) && $attribute != '') {
+                                        if (!in_array($attribute, $attributes) && $attribute != '') {
                                             array_push($attributes, $attribute);
                                         }
                                         $attribute_value = $request->attribute_value[$key] ?? '';
-                                    }
-                                    else {
+                                    } else {
                                         $attribute = '';
                                         $attribute_value = '';
                                     }
-                
+
                                     $stock->color = $color;
                                     $stock->variant = $attribute;
                                     $stock->variant_output = $attribute_value;
-                                    $stock->sku = $request->variant_sku[$key]??($product->id.'-'.$key);
+                                    $stock->sku = $request->variant_sku[$key] ?? ($product->id . '-' . $key);
                                     $stock->price = $request->variant_price[$key];
                                     $stock->qty = $request->variation_stock_qty[$key];
                                     $stock->is_active = $request->is_active[$key];
-                                    
-                
-                                    // image save
-                                    $img_v = 'variation_image'.$variation_parent;
-                                    if ($request->$img_v){
 
-                                        if (File::exists('images/product/'.$stock->image)){
-                                            File::delete('images/product/'.$stock->image);
+
+                                    // image save
+                                    $img_v = 'variation_image' . $variation_parent;
+                                    if ($request->$img_v) {
+
+                                        if (File::exists('images/product/' . $stock->image)) {
+                                            File::delete('images/product/' . $stock->image);
                                         }
 
                                         $image = $request->file($img_v);
-                                        $img = time().rand().'.' . $image->getClientOriginalExtension();
-                                        $location = public_path('images/product/'. $img);
+                                        $img = time() . rand() . '.' . $image->getClientOriginalExtension();
+                                        $location = public_path('images/product/' . $img);
                                         Image::make($image)->save($location);
                                         $stock->image = $img;
                                     }
-                
+
                                     $stock->save();
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             $variation_parent = $request->variation_parent[$key];
-    
-                            if($request->has('colour_attribute')){
+
+                            if ($request->has('colour_attribute')) {
                                 //For colors attribute
                                 $color = $request->colour_attribute[$key];
-                                if(!in_array($color, $colors) && $color != '') {
+                                if (!in_array($color, $colors) && $color != '') {
                                     array_push($colors, $color);
                                 }
-                            }
-                            else {
+                            } else {
                                 $color = '';
                             }
-        
-                            if($request->has('attribute_id') && $request->attribute_id <> ''){
+
+                            if ($request->has('attribute_id') && $request->attribute_id <> '') {
                                 //For variation attribute
                                 $attribute = $request->attribute_id[$key] ?? '';
-                                if(!in_array($attribute, $attributes) && $attribute != '') {
+                                if (!in_array($attribute, $attributes) && $attribute != '') {
                                     array_push($attributes, $attribute);
                                 }
                                 $attribute_value = $request->attribute_value[$key] ?? '';
-                            }
-                            else {
+                            } else {
                                 $attribute = '';
                                 $attribute_value = '';
                             }
-        
+
                             $stock = new ProductStocks;
                             $stock->product_id = $product->id;
                             $stock->color = $color;
                             $stock->variant = $attribute;
                             $stock->variant_output = $attribute_value;
-                            $stock->sku = $request->variant_sku[$key]??($product->id.'-'.$key);
+                            $stock->sku = $request->variant_sku[$key] ?? ($product->id . '-' . $key);
                             $stock->price = $request->variant_price[$key];
                             $stock->qty = $request->variation_stock_qty[$key];
-        
+
                             // image save
-                            $img_v = 'variation_image'.$variation_parent;
-                            if ($request->$img_v){
+                            $img_v = 'variation_image' . $variation_parent;
+                            if ($request->$img_v) {
                                 $image = $request->file($img_v);
-                                $img = time().rand().'.' . $image->getClientOriginalExtension();
-                                $location = public_path('images/product/'. $img);
+                                $img = time() . rand() . '.' . $image->getClientOriginalExtension();
+                                $location = public_path('images/product/' . $img);
                                 Image::make($image)->save($location);
                                 $stock->image = $img;
                             }
-        
+
                             $stock->save();
                         }
 
 
-                        
+
                     }
-    
+
                     $product->colors = $colors;
                     $product->attributes = $attributes;
                     $product->save();
-    
-                }
-            }
-            else {
 
-                if(count($product->variation_stock) > 0) {
-                    foreach($product->variation_stock as $v_stock) {
-                        if (File::exists('images/product/'.$v_stock->image)){
-                            File::delete('images/product/'.$v_stock->image);
+                }
+            } else {
+
+                if (count($product->variation_stock) > 0) {
+                    foreach ($product->variation_stock as $v_stock) {
+                        if (File::exists('images/product/' . $v_stock->image)) {
+                            File::delete('images/product/' . $v_stock->image);
                         }
                         $v_stock->delete();
                     }
                 }
 
                 $stock = $product->single_stock;
-                if(!is_null($stock)) {
+                if (!is_null($stock)) {
                     $stock->price = $request->single_price;
                     $stock->qty = $request->single_qty;
                     $stock->save();
-                }
-                else {
+                } else {
                     $stock = new ProductStocks;
                     $stock->product_id = $product->id;
                     $stock->price = $request->single_price;
@@ -720,8 +699,7 @@ class ProductController extends Controller
 
             Alert::toast('Product Updated!', 'success');
             return redirect()->route('product.index');
-        }
-        else{
+        } else {
             Alert::toast('Something went wrong!', 'error');
             return redirect()->route('product.index');
         }
@@ -739,21 +717,21 @@ class ProductController extends Controller
         if (!is_null($product)) {
             // Deleting the gallery files
             foreach ($product->product_image as $image) {
-                if (File::exists('images/product/'.$image->image)){
-                    File::delete('images/product/'.$image->image);
+                if (File::exists('images/product/' . $image->image)) {
+                    File::delete('images/product/' . $image->image);
                 }
                 $image->delete();
             }
             // Deleting the product image
-            if (File::exists('images/product/'.$product->thumbnail_image)){
-                File::delete('images/product/'.$product->thumbnail_image);
+            if (File::exists('images/product/' . $product->thumbnail_image)) {
+                File::delete('images/product/' . $product->thumbnail_image);
             }
 
             // Deleting the variations 
-            if(count($product->variation_stock) > 0) {
-                foreach($product->variation_stock as $v_stock) {
-                    if (File::exists('images/product/'.$v_stock->image)){
-                        File::delete('images/product/'.$v_stock->image);
+            if (count($product->variation_stock) > 0) {
+                foreach ($product->variation_stock as $v_stock) {
+                    if (File::exists('images/product/' . $v_stock->image)) {
+                        File::delete('images/product/' . $v_stock->image);
                     }
                     $v_stock->delete();
                 }
@@ -761,36 +739,36 @@ class ProductController extends Controller
 
             $product->delete();
             return back()->with('success', 'Product has been deleted !');
-        }
-        else {
-            session()->flash('error','Something went wrong !');
+        } else {
+            session()->flash('error', 'Something went wrong !');
             return back();
         }
     }
 
-    public function color_index() {
+    public function color_index()
+    {
 
         if (Auth::user()->type == 1) {
             $colors = Colors::orderBy('name', 'ASC')->get();
             return view('admin.color.index', compact('colors'));
-        }
-        else{
+        } else {
             Alert::toast('Access Denied !', 'error');
             return back();
         }
     }
 
-    public function color_store(Request $request) {
+    public function color_store(Request $request)
+    {
 
-        if($request->color_code){
+        if ($request->color_code) {
             $code = $request->color_code;
-        }else{
+        } else {
             $code = $request->code;
         }
         $name = $request->name;
 
         $check_color = Colors::where('name', $name)->orWhere('code', $code)->first();
-        if(!is_null($check_color)) {
+        if (!is_null($check_color)) {
             Alert::toast('This name or Color is exist!', 'error');
             return back();
         }
@@ -802,7 +780,7 @@ class ProductController extends Controller
 
         Alert::toast('New Color Added.', 'success');
         return back();
-        
+
     }
 
     public function color_edit($id)
@@ -811,22 +789,21 @@ class ProductController extends Controller
             $color = Colors::find($id);
             if (!is_null($color)) {
                 return view('admin.color.edit', compact('color'));
-            }
-            else {
-                session()->flash('error','Something went wrong !');
+            } else {
+                session()->flash('error', 'Something went wrong !');
                 return back();
             }
-        }
-        else {
-            session()->flash('error','Access Denied !');
+        } else {
+            session()->flash('error', 'Access Denied !');
             return back();
         }
     }
 
-    public function color_update(Request $request, $id) {
-        if($request->color_code){
+    public function color_update(Request $request, $id)
+    {
+        if ($request->color_code) {
             $code = $request->color_code;
-        }else{
+        } else {
             $code = $request->code;
         }
         $name = $request->name;
@@ -838,36 +815,67 @@ class ProductController extends Controller
 
         Alert::toast('Color Updated.', 'success');
         return Redirect()->route('color.index');
-        
+
     }
 
-    public function product_stock() {
+    public function product_stock()
+    {
         if (Auth::user()->type == 1) {
             $stock_info = ProductStocks::all();
             return view('admin.product.product_stock', compact('stock_info'));
-        }
-        else {
-            session()->flash('error','Access Denied !');
+        } else {
+            session()->flash('error', 'Access Denied !');
             return back();
         }
     }
 
-    public function stock_qty_update(Request $request) {
+    public function stock_qty_update(Request $request)
+    {
         if (Auth::user()->type == 1) {
             $stock_id = $request->stock_id;
             $stock_info = ProductStocks::find($stock_id);
-            if(is_null($stock_info)) {
-                session()->flash('error','Product Stock Info not Found!');
+            if (is_null($stock_info)) {
+                session()->flash('error', 'Product Stock Info not Found!');
                 return back();
             }
             $stock_info->qty = ($request->stock_qty) + 0;
             $stock_info->save();
             return back()->with('success', 'Product Stock Quantity Updated.');
-        }
-        else {
-            session()->flash('error','Access Denied !');
+        } else {
+            session()->flash('error', 'Access Denied !');
             return back();
         }
+    }
+    public function updateStatus(Request $request)
+    {
+        $product = Product::findOrFail($request->id);
+        $product->is_active = $request->status;
+        $product->save();
+
+        return back()->with('success', 'Product status Updated.');
+    }
+    public function bulkAction(Request $request)
+    {
+        $ids = $request->ids;
+        $action = $request->action;
+
+        if ($action === 'delete') {
+            Product::whereIn('id', $ids)->delete();
+            return back()->with('success', 'Selected products deleted successfully.');
+        }
+
+        if ($action === 'activate') {
+            Product::whereIn('id', $ids)->update(['is_active' => 1]);
+            return back()->with('success', 'Selected products activated successfully.');
+        }
+
+        if ($action === 'deactivate') {
+            Product::whereIn('id', $ids)->update(['is_active' => 0]);
+            return back()->with('success', 'Selected products deactivated successfully.');
+        }
+
+        return back()->with('success', 'Invalid action.');
+
     }
 
 

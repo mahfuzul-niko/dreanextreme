@@ -232,7 +232,7 @@
     </div>
 </div> 
 {{-- ./ Bullet Point End --}}
-<section class="team__section py-5">
+{{-- <section class="team__section py-5">
     <div class="container-fluid">
         <div class="section__heading text-center mb-50">
             <h2 title="Get your desired product from featured category" class="section__heading--maintitle">Featured Categories</h2>
@@ -264,13 +264,13 @@
                 @endforeach
         </div>
     </div>
-</section>
+</section> --}}
 {{-- Featured Products --}}
 @if ($featured_products->count()>0)
 <section class="product__section section--padding py-5">
     <div class="container-fluid">
         <div class="section__heading text-center mb-50">
-            <h2 title="Get your desired product from Featured Products" class="section__heading--maintitle">Featured Products</h2>
+            <h2 title="Get your desired product from Flash Sale" class="section__heading--maintitle">Flash Sale</h2>
             <div class="btn_custom mb-2 ">
                 <a class=" rounded shop_more_btn" href="{{route('products.individual.group', ['slug'=>'featured'])}}">Shop More
                     <svg class="primary__btn--arrow__icon" xmlns="http://www.w3.org/2000/svg" width="20.2" height="12.2" viewBox="0 0 6.2 6.2">
